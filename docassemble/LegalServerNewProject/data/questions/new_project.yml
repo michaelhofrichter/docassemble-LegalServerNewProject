@@ -1,7 +1,6 @@
 metadata:
-  title: Default playground interview
-  short title: Test
-  comment: This is a learning tool.  Feel free to write over it.
+  title: New LegalServer Project
+  short title: New LS Project
 ---
 objects:
   - client: Person
