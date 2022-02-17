@@ -36,7 +36,6 @@ question: |
   Streak
 fields:
   - What stage is the box in: streak_box_stage
-    show if: streak_box_exists
     input type: radio
     code: | 
       streak_stages_in_pipeline(streak_pipelinekey_projects)      
