@@ -1,0 +1,189 @@
+metadata:
+  title: Default playground interview
+  short title: Test
+  comment: This is a learning tool.  Feel free to write over it.
+---
+objects:
+  - client: Person
+  - project: DAObject
+---
+code: | 
+  if 'playground' in interview_url():
+    jira_client_name = "Michael (Michael Demo)"
+    jira_project = "sandbox"
+  else:
+    jira_client_name = jira_get_client_name_from_abbreviation(client.abbreviation)
+    jira_project = "LS"
+  set_jira_client_name_defaults = True
+---
+comment: |
+  features: 
+  css: docassemble.LegalServerBaseComponents:data/static/legalserver-live.css
+---
+modules:
+  - docassemble.LegalServerBaseComponents.google_sheets
+  - docassemble.LegalServerBaseComponents.help_functions
+  - docassemble.LegalServerBaseComponents.streak
+  - docassemble.LegalServerBaseComponents.slack
+  - docassemble.LegalServerBaseComponents.jira
+---
+code: | 
+  set_jira_client_name_defaults
+  if jira_client_name == '':
+    confirm_jira_client
+  jira_client_confirmed = True
+---
+question: | 
+  Streak
+fields:
+  - What stage is the box in: streak_box_stage
+    show if: streak_box_exists
+    input type: radio
+    code: | 
+      streak_stages_in_pipeline(streak_pipelinekey_projects)      
+---
+question: | 
+  Streak Project Box
+fields: 
+  - Which is the client box: project_streak_box
+    datatype: radio
+    code: | 
+      streak_get_boxes_in_pipeline(streak_pipelinekey_projects, streak_box_stage) 
+continue button field:  select_project_box
+---
+code: | 
+  streak_pipelinekey_projects = "agxzfm1haWxmb29nYWVyNgsSDE9yZ2FuaXphdGlvbiIPbGVnYWxzZXJ2ZXIub3JnDAsSCFdvcmtmbG93GICAgICgjoEKDA"
+  if streak_box_exists:
+    select_project_box
+  else:
+    streak_box_created 
+  
+  add_details_comment
+  add_jira_comment
+  confirm_project_streak_box = True
+---
+code: |
+  project_comment_added = create_streak_comment(project_streak_box, project.details)
+  add_details_comment = True
+---
+code: | 
+  project_comment_added = create_streak_comment(project_streak_box, "Jira Epic: " + jira_epic)
+  add_jira_comment = True
+---
+code: |
+    project_streak_box = create_streak_box(streak_pipelinekey_projects, project.name)
+    update_streak_box(project_streak_box, 'mhofrichter@legalserver.org')
+
+    streak_box_created = True
+---
+code: | 
+  streak_client_name = search_streak_for_a_box(jira_client_name)
+  # client.streak_box
+  if streak_client_name == "No Results" or streak_client_name == "Multiple Results":
+    streak_client_confirmed = False
+  else:
+    streak_client_confirmed = True
+---
+question: |  
+  Please Confirm the Jira/Streak Client names
+fields: 
+  - Jira: jira_client_name
+continue button field: confirm_jira_client
+---
+question: | 
+  Project Background 
+fields:
+  - Client Abbreviation: client.abbreviation
+  - Project Short name: project.name
+  - Description of the Project: project.description
+    input type: area
+  - Relevant Timelines/Deadlines: project.timelines
+    input type: area
+  - Is there anything prompting us to hesitate in taking this project? Any red flags you can see?: project.redflags
+    input type: area
+  - Project Type: project.type
+    choices: 
+      - Small Development Request
+      - Large Development Request
+      - Major Project
+      - Undetermined Project
+      - Buildout Requests
+  - Is there already a streak box for this project: streak_box_exists
+    datatype: yesnoradio
+  - Is there a jira epic already?: jira_epic_exists
+    datatype: yesnoradio
+  - What is the Jira Epic Number (starting with LS-)?: jira_epic
+    show if: jira_epic_exists
+  - Is there a jira quote ticket already?: jira_quote_exists
+    datatype: yesnoradio
+  - What is the Jira Epic Number (starting with LS-)?: jira_quote
+    show if: jira_quote_exists
+continue button field: background_info_collected  
+---
+question: | 
+  Optional Questions
+fields: 
+  - "How does this project align with our company mission and/or strategies? (Outside of a client request - what makes this a project we’d want to undertake?)": project.alignment
+    required: False
+    input type: area
+  - "Is there a want or need for this functionality outside of the client who requested it? (You may need to ask the team or look at jira to see if this request was made before. Please note: this may not apply to all projects, just note that here.)": project.other_interest
+    required: False
+    input type: area
+  - "Do you think the outcome of this project is possible? What level of effort do you think is involved? What other functionality does this build off of?": project.possible
+    required: False
+    input type: area
+  - "Do you think this project is worth undertaking? Why or why not?": project.worthwhile
+    required: False
+    input type: area
+continue button field: optional_questions_collected
+---
+event: ending
+question: | 
+  Project Created
+subquestion: | 
+  % if jira_epic_work:
+  Jira Epic created: ${ jira_epic } 
+  % endif
+  
+  % if jira_quote_work:
+  Jira Quote created: ${ jira_quote } 
+  % endif
+  
+  % if streak_box_created:
+  Streak box created and assigned to Michael
+  % endif 
+
+---
+code: | 
+  project.details = "*Description:*\n" + project.description + "\n\n*Timeline:*\n" + project.timelines  + "\n\n*Red Flags:*\n" + project.redflags
+  if defined('project.alignment'):
+    project.details = project.details + "\n\n*Alignment with LS Mission or Strategy:*\n" + project.alignment
+  if defined('project.other_interest'):
+    project.details = project.details + "\n\n*Other Interest:*\n" + project.other_interest
+  if defined('project.possible'):
+    project.details = project.details + "\n\n*Possible:*\n" + project.possible
+  if defined('project.worthwhile'):
+    project.details = project.details + "\n\n*Worthwhile:*\n" + project.worthwhile
+---
+code: | 
+  if not jira_epic_exists:
+    jira_epic = jira_create_issue(project.details, project.name, client.abbreviation, '', jira_project, 'epic', 'Unknown', jira_client_name, 'No Type', '', '', 'mhofrichter@legalserver.org')
+    jira_transition_to_pending(jira_epic)
+  jira_epic_work = True
+---
+code: | 
+  if not jira_quote_exists:
+    jira_quote = jira_create_issue(project.details, "Planning " + project.name, client.abbreviation, jira_epic, jira_project, 'task', 'Unknown', jira_client_name, 'No Type', '', '', 'mhofrichter@legalserver.org')
+    jira_transition_to_pending(jira_quote)
+  jira_quote_work = True  
+---
+mandatory: True
+code: |
+  background_info_collected
+  optional_questions_collected
+  jira_client_confirmed
+  streak_client_confirmed
+  confirm_project_streak_box
+  jira_epic_work
+  jira_quote_work
+  ending
