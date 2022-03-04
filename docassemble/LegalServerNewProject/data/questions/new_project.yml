@@ -119,7 +119,7 @@ fields:
   - Should the existing Jira Quote be moved to the new epic?: move_existing_quote
     datatype: yesnoradio
     js show if: |
-      val("jira_quote_exists") == True &&  val("jira_epic_exists") == False
+      val("jira_quote_exists") == true && val("jira_epic_exists") == false
 continue button field: background_info_collected  
 ---
 question: | 

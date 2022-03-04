@@ -43,9 +43,9 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.LegalServerNewProject',
-      version='0.0.5',
+      version='0.0.6',
       description=('A docassemble extension.'),
-      long_description='# LegalServer Create Project\r\n\r\n##\r\n* 0.0.5 - added option to link existing quote to new epic and links to epic/quote\r\n* 0.0.4 - removed streak show if\r\n* 0.0.3 - Added quote language to the ticket\r\n* 0.0.2 - Update Metadata\r\n* 0.0.1 - Initial package',
+      long_description='# LegalServer Create Project\r\n\r\n##\r\n* 0.0.6 - fixed true false caps\r\n* 0.0.5 - added option to link existing quote to new epic and links to epic/quote\r\n* 0.0.4 - removed streak show if\r\n* 0.0.3 - Added quote language to the ticket\r\n* 0.0.2 - Update Metadata\r\n* 0.0.1 - Initial package',
       long_description_content_type='text/markdown',
       author='Network Ninja, Inc.',
       author_email='mhofrichter@legalserver.org',
