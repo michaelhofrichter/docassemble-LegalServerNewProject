@@ -182,7 +182,7 @@ code: |
 ---
 code: | 
   if not jira_quote_exists:
-    jira_quote = jira_create_issue(project.details_quote, "Planning " + project.name, client.abbreviation, jira_epic, jira_project, 'task', 'Unknown', jira_client_name, 'No Type', '', '', 'mhofrichter@legalserver.org')
+    jira_quote = jira_create_issue(project.details_quote, "Planning " + project.name, client.abbreviation, jira_epic, jira_project, 'task', '4h', jira_client_name, 'No Type', '', '', 'mhofrichter@legalserver.org')
     jira_transition_to_pending(jira_quote)
   else:
     if move_existing_quote_to_new_epic:
