@@ -114,8 +114,12 @@ fields:
     show if: jira_epic_exists
   - Is there a jira quote ticket already?: jira_quote_exists
     datatype: yesnoradio
-  - What is the Jira Epic Number (starting with LS-)?: jira_quote
+  - What is the Jira Quote Number (starting with LS-)?: jira_quote
     show if: jira_quote_exists
+  - Should the existing Jira Quote be moved to the new epic?: move_existing_quote
+    datatype: yesnoradio
+    js show if: |
+      val("jira_quote_exists") == True &&  val("jira_epic_exists") == False
 continue button field: background_info_collected  
 ---
 question: | 
@@ -140,11 +144,15 @@ question: |
   Project Created
 subquestion: | 
   % if jira_epic_work:
-  Jira Epic created: ${ jira_epic } 
+  Jira Epic: [${ jira_epic }](https://jira.legalserver.org/browse/${ jira_epic }) 
   % endif
   
   % if jira_quote_work:
-  Jira Quote created: ${ jira_quote } 
+  Jira Quote: [${ jira_quote }](https://jira.legalserver.org/browse/${ jira_quote_work }) 
+    % if move_existing_quote_to_new_epic:
+  
+  Existing quote was linked to the new epic above.
+    % endif
   % endif
   
   % if streak_box_created:
@@ -174,7 +182,19 @@ code: |
   if not jira_quote_exists:
     jira_quote = jira_create_issue(project.details_quote, "Planning " + project.name, client.abbreviation, jira_epic, jira_project, 'task', 'Unknown', jira_client_name, 'No Type', '', '', 'mhofrichter@legalserver.org')
     jira_transition_to_pending(jira_quote)
+  else:
+    if move_existing_quote_to_new_epic:
+      jira_update_epic(jira_quote, jira_epic)
   jira_quote_work = True  
+---
+code: | 
+  if jira_epic_exists or not jira_quote_exists:
+    move_existing_quote_to_new_epic = False
+  else:
+    if not jira_epic_exists and jira_quote_exists:
+      move_existing_quote_to_new_epic = move_existing_quote
+    else:
+      move_existing_quote_to_new_epic = False
 ---
 mandatory: True
 code: |
