@@ -148,7 +148,7 @@ subquestion: |
   % endif
   
   % if jira_quote_work:
-  Jira Quote: [${ jira_quote }](https://jira.legalserver.org/browse/${ jira_quote_work }) 
+  Jira Quote: [${ jira_quote }](https://jira.legalserver.org/browse/${ jira_quote }) 
     % if move_existing_quote_to_new_epic:
   
   Existing quote was linked to the new epic above.
@@ -158,7 +158,9 @@ subquestion: |
   % if streak_box_created:
   Streak box created and assigned to Michael
   % endif 
-
+buttons:
+  - Exit: exit
+  - Restart: restart
 ---
 code: | 
   project.details = "*Description:*\n" + project.description + "\n\n*Timeline:*\n" + project.timelines  + "\n\n*Red Flags:*\n" + project.redflags
